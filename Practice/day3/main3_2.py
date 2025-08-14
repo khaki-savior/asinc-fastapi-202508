@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 import uvicorn
 from pydantic import BaseModel
 from typing import Optional
@@ -37,18 +37,31 @@ async def get_books():
     return books_to_show
 
 @app.get("/books/{book_id}")
-async def get_book_by_id(book_id: int):
+async def get_book_by_id(book_id: int, response: Response):
+    if book_id not in books_db:
+        response.status_code = 404
+        return {"detail": "Book not found"}
+    
     book_data = books_db[book_id]
     book = Book(**book_data)
     return book
 
 @app.post("/books")
-def add_books():
-    pass
+def add_books(book: Book, response: Response):
+    new_book_id = len(books_db) + 1
+    if book.title == "":
+        response.status_code = 404
+        return {"detail": "Title required"}
+    books_db[new_book_id] = {"title": book.title, "author": book.author}
+    return {"book_id": new_book_id, "book": books_db[new_book_id]}
 
 @app.put("/books/{book_id}")
-def update_book_by_id():
-    pass
+def update_book_by_id(book_id: int, book: Book, response: Response):
+    if book_id not in books_db:
+        response.status_code = 404
+        return {"detail": "Book not found"}
+    books_db[book_id] = {"title": book.title, "author": book.author}
+    return {"detail": "Book updated successfully"}
 
 @app.delete("/books/{book_id}")
 def update_book_by_id():

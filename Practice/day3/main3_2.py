@@ -61,7 +61,7 @@ def update_book_by_id(book_id: int, book: Book, response: Response):
         response.status_code = 404
         return {"detail": "Book not found"}
     books_db[book_id] = {"title": book.title, "author": book.author}
-    return {"detail": "Book updated successfully"}
+    return {"detail": f"Book {book_id} updated successfully: {books_db[book_id]}" }
 
 @app.delete("/books/{book_id}")
 def delete_book_by_id(book_id: int, response: Response):
